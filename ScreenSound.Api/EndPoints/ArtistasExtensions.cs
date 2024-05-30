@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using ScreenSound.Api.Requests;
 using ScreenSound.Api.Response;
 using ScreenSound.Banco;
@@ -12,7 +13,13 @@ namespace ScreenSound.Api.EndPoints
         {
             app.MapGet("/Artistas", ([FromServices] DAL<Artista> dal) =>
             {
-                return Results.Ok(dal.Listar());
+                var artistaList = dal.Listar();
+
+                if (artistaList is null) return Results.NotFound();
+
+                var artistaResponse = EntityListToResponseList(artistaList);
+
+                return Results.Ok(artistaResponse);
             });
 
             app.MapGet("/Artistas/{nome}", ([FromServices] DAL<Artista> dal, string nome) =>
